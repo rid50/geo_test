@@ -37,7 +37,11 @@ namespace metaquotes_web
                 }
             }
 
-            var data = Helper.GenerateJsonResult(Cache.locations[index], index != -1);
+            object data;
+            if (index != -1)
+                data = Helper.GenerateJsonResult(Cache.locations[index]);
+            else
+                data = new { error = "Данные отсутствуют" };
 
             return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
 

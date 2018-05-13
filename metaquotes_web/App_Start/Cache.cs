@@ -122,7 +122,6 @@ namespace metaquotes_web
             using (BinaryReader br = new BinaryReader(fileStream))
             {
                 //Debug.WriteLine("Length of the stream: " + br.BaseStream.Length);
-
                 //byte[] bt = new byte[br.BaseStream.Length];
 
                 Stopwatch sw = new Stopwatch();
@@ -152,46 +151,21 @@ namespace metaquotes_web
                 locations = new Location[hd.records];
                 for (int i = 0; i < hd.records; i++)
                 {
-                    //locations[i] = PtrToStruct<Location>(br.ReadBytes(size));
-
-                    //Location location = default(Location);
-
-                    //location.country = br.ReadBytes(8);
-                    //location.region = br.ReadBytes(12);
-                    //location.postal = br.ReadBytes(12);
-                    //location.city = br.ReadBytes(24);
-                    //location.organization = br.ReadBytes(32);
-                    //location.latitude = br.ReadSingle();
-                    //location.longitude = br.ReadSingle();
-
-                    //locations[i] = location;
-
                     //byte[] data = br.ReadBytes(Marshal.SizeOf(typeof(Location)));
                     //unsafe
                     //{
-
-                    //    //fixed (byte* ptr = locations[i].dump )
                     //    fixed (byte* ptr = &data[0])
                     //    {
                     //        locations[i] = (Location)Marshal.PtrToStructure(new IntPtr(ptr), typeof(Location));
-                    //        //ptr[1] = 0x02;
-                    //        //*ptr = 0x01;
-                    //        //locations[i].dump = ptr;
-
                     //    }
-                    //    //fixed { locations[i].dump[0] = 0x00; }
-
-                    //}
-
-                    //locations[i].dump = br.ReadBytes(88);
 
                     locations[i].country = br.ReadBytes(8);
                     locations[i].region = br.ReadBytes(12);
                     locations[i].postal = br.ReadBytes(12);
                     br.ReadBytes(4);
                     locations[i].city = br.ReadBytes(20);
-                    //br.Read(locations[i].city, 4, 20);
 
+                    // 
                     //cities[i] = System.Text.Encoding.UTF8.GetString(Cache.locations[i].city);
                     //if (i < 110)
                     //{
@@ -202,39 +176,9 @@ namespace metaquotes_web
                     locations[i].organization = br.ReadBytes(32);
                     locations[i].latitude = br.ReadSingle();
                     locations[i].longitude = br.ReadSingle();
-
-                    //locations[i] = loc;
-                    //loc = ReadUsingMarshalUnsafe<Location>(br.ReadBytes(8));
-                    //Console.WriteLine(System.Text.Encoding.Default.GetString(locations[0].country));
-                    //Console.WriteLine(System.Text.Encoding.Default.GetString(loc.region));
-                    //Console.WriteLine(System.Text.Encoding.Default.GetString(loc.postal));
-                    //Console.WriteLine(System.Text.Encoding.Default.GetString(loc.city));
-                    //Console.WriteLine(System.Text.Encoding.Default.GetString(loc.organization));
-                    //Console.WriteLine(loc.latitude);
-                    //Console.WriteLine(loc.longitude);
-
                 }
 
-                Debug.WriteLine(System.Text.Encoding.Default.GetString(locations[0].city));
-                //Debug.WriteLine("\n");
-                //Console.WriteLine(br.BaseStream.Position);
-
-                //unsafe
-                //{
-                //    fixed(byte* ptr = locations[0].country) {
-                //        //int* pp = locations[0].country;
-                //        //Console.WriteLine("country: " + System.Text.Encoding.Default.GetString(ptr, ));
-                //    }
-                //}
-
-                //br.BaseStream.Position = hd.offset_cities;
-                //Console.WriteLine(br.BaseStream.Position);
-
-                //byte[][] cities = new byte[hd.records][];
-                //sw.Stop();
-                ////Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                //Console.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
-                //sw.Start();
+                //Debug.WriteLine(System.Text.Encoding.Default.GetString(locations[0].city));
 
                 //byte[][] cities = new byte[hd.records][];
                 ////uint[] cities = new uint[hd.records];
@@ -246,56 +190,7 @@ namespace metaquotes_web
                 //}
 
                 //if (BitConverter.IsLittleEndian)
-                  //  Array.Reverse(cities[0]);
-
-                //uint value = BitConverter.ToUInt32(cities[0], 0);
-
-                //Debug.WriteLine("city: " + value);
-
-                //Debug.WriteLine("cities: " + System.Text.Encoding.Default.GetString(cities[0]));
-
-                //Debug.WriteLine("\n");
-
-                //Console.WriteLine(br.BaseStream.Position);
-
-                //br.BaseStream.Position = cities[0];
-
-                //Console.WriteLine("cities: " + cities[0]);
-                //if (BitConverter.IsLittleEndian)
-                //Array.Reverse(cities[0]);
-
-                //int indx = BitConverter.ToInt32(cities[0], 0);
-                //int indx = cities[0] - hd.offset_locations;
-                //Console.WriteLine(indx);
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(locations[indx].country));
-
-                //br.BaseStream.Position = cities[0];
-
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(br.ReadBytes(8)));
-                //Console.WriteLine(cities[0]);
-
-                //Console.WriteLine(cities.Length);
-                //Console.WriteLine(br.BaseStream.Position);
-
-                //br.BaseStream.Position = hd.offset_cities;
-
-
-                //Location[] locations = new Location[hd.records];
-                //byte[] byt = new Byte[10];
-                ////br.Read((byte[])locations, 0, locations.Length);
-                ////Location loc = new Location();
-                //int structSize;
-                //unsafe {
-                //    structSize = sizeof(Location);
-                //}
-
-                //byte[] bt = new Byte[structSize];
-                //bt = br.ReadBytes(structSize);
-                //bt.CopyTo(locations, 0);
-
-                ////Console.WriteLine(((Location)locations[0]).
-                ////int size = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Location));
-                //Console.WriteLine(structSize);
+                //  Array.Reverse(cities[0]);
 
                 sw.Stop();
                 Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);

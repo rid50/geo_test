@@ -35,9 +35,9 @@
             e.preventDefault();
             $("#dv > h2").text($("#aip").text());
             $('#output').val('');
-            $cityorip.val('0.0.0.9');
+            $cityorip.val('');
             $cityorip.removeAttr("list");
-            $cityorip.attr("placeholder", "Введите IP адрес");
+            $cityorip.attr("placeholder", "Введите IP адрес в формате x.x.x.x");
         })
 
         $("#acity").click(function (e) {
