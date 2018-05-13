@@ -1,0 +1,47 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<!--<div class="jumbotron">
+    <h1>ASP.NET</h1>
+    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
+    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>-->
+
+<div class="container">
+    <div class="row">
+        <div class="card">
+            <div class="col-xs-4 card-body">
+                <h2 class="card-title">Выбор запроса</h2>
+                <br />
+                <a id="acity" href="/city/location" class="card-link">Поиск в списке метоположений</a>
+                <br /><br />
+                <a id="aip" href="/ip/location" class="card-link">Поиск гео-информации по IP</a>
+            </div>
+        </div>
+
+        <div class="col-xs-6 col-xs-offset-1" id="dv">
+            <h2>Поиск в списке метоположений</h2>
+
+            <form id="frm" data-toggle="validator" role="form" method="GET">
+                <div class="form-group has-feedback">
+                    <input type="text" class="form-control" id="cityorip" list="cities" placeholder="Введите название города" required data-error="Поле не должно быть пустым"/>
+                    <!--<div class="help-block with-errors"></div>-->
+                    <datalist id=cities style="display: none">
+                        <option value="Erabara Ytaciz"></option>
+                        <option value="Alig Ma Oz"></option>
+                        <option value="Elevyryvari"></option>
+                        <option value="Uqoced"></option>
+                        <option value="Yb Ryjyp Sebysew"></option>
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="output" rows="12" readonly></textarea>
+                </div>
+                <div>
+                    <input class="btn btn-primary active" type="button" id="btnSubmit" value="Искать">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

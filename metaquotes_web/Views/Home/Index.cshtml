@@ -1,0 +1,95 @@
+﻿@section SPAViews {
+    @Html.Partial("_Home")
+}
+@*
+    @section Scripts{
+        @Scripts.Render("~/bundles/knockout")
+        @Scripts.Render("~/bundles/app")
+    }
+*@
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+    <script src="/Scripts/ipaddr.min.js"></script>"
+
+    <script type="text/javascript">
+        //$.ajaxSetup({
+        //    scriptCharset: "utf-8",
+        //    contentType: "application/json; charset=utf-8"
+        //});
+
+        //$('#frm').validator().on('invalid.bs.validator', function (e) {
+        //    //if (!e.isDefaultPrevented()) {
+        //        //if ($("#cityorip").val() == '')
+        //            //alert("invalid");
+        //        return false;
+        //        // handle the invalid form...
+        //    //} else {
+        //     //   e.preventDefault();
+        //        //alert("valid");
+        //        // everything looks good!
+        //    //}
+        //})
+        var $cityorip = $("#cityorip");
+        $("#aip").click(function (e) {
+            e.preventDefault();
+            $("#dv > h2").text($("#aip").text());
+            $('#output').val('');
+            $cityorip.val('0.0.0.9');
+            $cityorip.removeAttr("list");
+            $cityorip.attr("placeholder", "Введите IP адрес");
+        })
+
+        $("#acity").click(function (e) {
+            e.preventDefault();
+            $("#dv > h2").text($("#acity").text());
+            $('#output').val('');
+            $cityorip.val('');
+            $cityorip.attr("list", "cities");
+            $cityorip.attr("placeholder", "Введите название города");
+        })
+
+        $("#btnSubmit").click(function (e) {
+            $('#output').val('');
+
+            if ($cityorip.attr("list") == undefined)
+                if (!ipaddr.isValid($('#cityorip').val()))
+                    return;
+
+            if ($cityorip.val() == '') {
+                e.preventDefault();
+                return;
+            }
+
+            //var actionUrl = '@Url.Action("GetCity", "City", new { city = "$('#cityorip').val()" }, Request.Url.Scheme)';
+            var url;
+            if ($cityorip.attr("list") == undefined)
+                url = "/ip/location?ip=" + $('#cityorip').val();
+            else
+                url = "/city/location?city=cit_" + $('#cityorip').val();
+
+            $.getJSON(url, function (response) {
+                if (response != null) {
+                    var $ta = $("#output");
+                    if (!response.data.error) {
+                        $ta.val("City: " + response.data.city + "\n");
+                        $ta.val($ta.val() + "Country: " + response.data.country + "\n");
+                        $ta.val($ta.val() + "Region: " + response.data.region + "\n");
+                        $ta.val($ta.val() + "Postal: " + response.data.postal + "\n");
+                        $ta.val($ta.val() + "Organization: " + response.data.organization + "\n");
+                        $ta.val($ta.val() + "Latitude: " + response.data.latitude + "\n");
+                        $ta.val($ta.val() + "Longitude: " + response.data.longitude + "\n");
+                    } else
+                        $ta.val(response.data.error);
+                }
+            })
+        })
+
+        $("#cityorip").keypress(function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $("#btnSubmit").click();
+            }
+        });
+    </script>
+}
