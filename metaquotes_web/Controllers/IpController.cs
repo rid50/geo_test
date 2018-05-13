@@ -30,8 +30,6 @@ namespace metaquotes_web
         // GET ip/location
         public JsonResult GetIP(string ip)
         {
-            //byte[] byteArray = BitConverter.GetBytes(IpStringToIpUint(ip));
-
             uint uip = IpStringToIpUint(ip);
             int index = -1;
             for (int i = 0; i < Cache.ips.Length; i++)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using metaquotes_web.Controllers;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Web.Http;
@@ -36,23 +37,27 @@ namespace metaquotes_web
                 }
             }
 
-            if (index != -1)
-            {
-                var data = new
-                {
-                    city = System.Text.Encoding.UTF8.GetString(Cache.locations[index].city).Replace("\0", string.Empty),
-                    country = System.Text.Encoding.UTF8.GetString(Cache.locations[index].country).Replace("\0", string.Empty).Substring(4),
-                    region = System.Text.Encoding.UTF8.GetString(Cache.locations[index].region).Replace("\0", string.Empty).Substring(4),
-                    postal = System.Text.Encoding.UTF8.GetString(Cache.locations[index].postal).Replace("\0", string.Empty).Substring(4),
-                    organization = System.Text.Encoding.UTF8.GetString(Cache.locations[index].organization).Replace("\0", string.Empty).Substring(4),
-                    latitude = Cache.locations[index].latitude,
-                    longitude = Cache.locations[index].longitude
-                };
+            var data = Helper.GenerateJsonResult(Cache.locations[index], index != -1);
 
-                return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
-            }
-            else
-                return new JsonResult { Data = new { error = "Данные отсутствуют" }, ContentType = "application/json; charset=UTF-8" };
+            return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
+
+            //if (index != -1)
+            //{
+            //    var data = new
+            //    {
+            //        city = System.Text.Encoding.UTF8.GetString(Cache.locations[index].city).Replace("\0", string.Empty),
+            //        country = System.Text.Encoding.UTF8.GetString(Cache.locations[index].country).Replace("\0", string.Empty).Substring(4),
+            //        region = System.Text.Encoding.UTF8.GetString(Cache.locations[index].region).Replace("\0", string.Empty).Substring(4),
+            //        postal = System.Text.Encoding.UTF8.GetString(Cache.locations[index].postal).Replace("\0", string.Empty).Substring(4),
+            //        organization = System.Text.Encoding.UTF8.GetString(Cache.locations[index].organization).Replace("\0", string.Empty).Substring(4),
+            //        latitude = Cache.locations[index].latitude,
+            //        longitude = Cache.locations[index].longitude
+            //    };
+
+            //    return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
+            //}
+            //else
+            //    return new JsonResult { Data = new { error = "Данные отсутствуют" }, ContentType = "application/json; charset=UTF-8" };
         }
     }
 }

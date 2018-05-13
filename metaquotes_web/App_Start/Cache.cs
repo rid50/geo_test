@@ -19,17 +19,6 @@ namespace metaquotes_web
         public uint offset_ranges;
         public uint offset_cities;
         public uint offset_locations;
-
-        //public GeoBaseHeader(int i)
-        //{
-        //    version = 0;
-        //    name = new byte[32];
-        //    timestamp = 0;
-        //    records = 0;
-        //    offset_ranges = 0;
-        //    offset_cities = 0;
-        //    offset_locations = 0;
-        //}
     }
 
     //unsafe struct Location
@@ -57,21 +46,8 @@ namespace metaquotes_web
         public byte[] postal;        // почтовый индекс (случайная строка с префиксом "pos_")
         public byte[] city;          // название города (случайная строка с префиксом "cit_")
         public byte[] organization;  // название организации (случайная строка с префиксом "org_")
-        public float latitude;        // широта
-        public float longitude;       // долгота
-        //public byte[] dump;
-        //public fixed byte dump[88];
-
-        //public Location(int i)
-        //{
-        //    country = new byte[8];
-        //    region = new byte[12];
-        //    postal = new byte[12];
-        //    city = new byte[24];
-        //    organization = new byte[32];
-        //    latitude = .0F;
-        //    longitude = .0F;
-        //}
+        public float latitude;       // широта
+        public float longitude;      // долгота
     }
 
     public struct Ip
@@ -89,7 +65,7 @@ namespace metaquotes_web
             {
                 return x == y;
             }
-            // Linq extension method is based on IEnumerable, must evaluate every item.
+            // Linq extension method
             return x.SequenceEqual(y);
         }
 
@@ -99,9 +75,7 @@ namespace metaquotes_web
             {
                 throw new ArgumentNullException("obj");
             }
-            // quick and dirty, instantly identifies obviously different
-            // arrays as being different
-            //return obj.Length;
+
             int i = BitConverter.ToString(obj).GetHashCode();
             return BitConverter.ToString(obj).GetHashCode();
         }
@@ -143,11 +117,8 @@ namespace metaquotes_web
         public static void LoadCache()
         {
             string path = AppDomain.CurrentDomain.GetData("DataDirectory").ToString();
-            //FileStream fileStream = File.OpenRead(Path.Combine(Directory.GetCurrentDirectory(), "geobase.dat"));
-            //FileStream fileStream = File.OpenRead(HostingEnvironment.MapPath("~/App_Data/geobase.dat"));
             FileStream fileStream = File.OpenRead(path + "/geobase.dat");
 
-            //using (FileStream fs = File.OpenRead(Path.Combine(Directory.GetCurrentDirectory(), "geobase.dat")))
             using (BinaryReader br = new BinaryReader(fileStream))
             {
                 //Debug.WriteLine("Length of the stream: " + br.BaseStream.Length);
@@ -157,42 +128,16 @@ namespace metaquotes_web
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
 
-                //bt = br.ReadBytes(bt.Length);
-
-                //sw.Stop();
-                //Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                //Console.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
-
-                //return;
-
                 GeoBaseHeader hd;
                 hd.version = br.ReadInt32();
-                //Console.WriteLine("hd.version: " + hd.version);
-
                 hd.name = br.ReadBytes(32);
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(hd.name));
-
                 hd.timestamp = br.ReadUInt64();
-                //var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)hd.timestamp).DateTime;
-                //Console.WriteLine("hd.timestamp: " + dateTimeOffset);
-
                 hd.records = br.ReadInt32();
-                //Console.WriteLine("hd.records: " + hd.records);
                 hd.offset_ranges = br.ReadUInt32();
-                //Console.WriteLine("hd.offset_ranges: " + hd.offset_ranges);
                 hd.offset_cities = br.ReadUInt32();
                 Console.WriteLine("hd.offset_cities: " + hd.offset_cities);
                 hd.offset_locations = br.ReadUInt32();
                 Console.WriteLine("hd.offset_locations: " + hd.offset_locations);
-
-                //sw.Stop();
-                ////Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                //Console.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
-                //sw.Start();
-
-                //br.BaseStream.Position = hd.offset_ranges;
-
-                //Console.WriteLine(br.BaseStream.Position);
 
                 ips = new Ip[hd.records];
 
@@ -203,48 +148,6 @@ namespace metaquotes_web
                     ips[i].location_index = br.ReadUInt32();
                 }
 
-                //Console.WriteLine(br.BaseStream.Position);
-
-
-                //Console.WriteLine("ip_from: " + IpUintToIpString(ips[0].ip_from));
-                //Console.WriteLine("ip_to: " + IpUintToIpString(ips[0].ip_to));
-                //Console.WriteLine("location_index: " + ips[10000].location_index);
-
-                //Console.WriteLine("ip_from: " + ips[0].ip_from);
-                //Console.WriteLine("ip_to: " + ips[0].ip_to);
-                //Console.WriteLine("location_index: " + ips[0].location_index);
-
-                //hd.version = br.ReadInt32();
-                //Console.WriteLine("hd.version: " + hd.version);
-                //br.BaseStream.Position = 0;
-                //hd.version = br.ReadInt32();
-                //Console.WriteLine("hd.version: " + hd.version);
-
-                //br.BaseStream.Position = hd.offset_locations;
-
-                //byte[] country = new byte[8];
-                //country = br.ReadBytes(8);
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(country));
-                //byte[] reg = new byte[8];
-                //reg = br.ReadBytes(8);
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(reg));
-
-                //Location loc = default(Location);
-                //int structSize;
-                //unsafe
-                //{
-                //    structSize = Marshal.SizeOf(loc);
-                //}
-                //Location loc = default(Location);
-
-                //sw.Stop();
-                ////Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                //Console.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
-                //sw.Start();
-                //int size = Marshal.SizeOf(typeof(Location));
-                //Location[] locations = new Location[hd.records];
-                //Dictionary<byte[], int> cities = new Dictionary<byte[], int>();
-                //cities = new Dictionary<byte[], int>(new ByteArrayComparer());
                 cities = new Dictionary<byte[], int>();
                 locations = new Location[hd.records];
                 for (int i = 0; i < hd.records; i++)
@@ -395,14 +298,8 @@ namespace metaquotes_web
                 //Console.WriteLine(structSize);
 
                 sw.Stop();
-                //Console.WriteLine("Elapsed={0}", sw.Elapsed);
                 Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
-
             }
-
-
-
-            //Console.WriteLine("Hello World!");
         }
     }
 }
