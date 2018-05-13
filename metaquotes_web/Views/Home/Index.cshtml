@@ -8,28 +8,65 @@
     }
 *@
 
+@section Styles {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/css/bootstrapValidator.min.css" rel="stylesheet" />
+}
+
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.5.3/js/bootstrapValidator.min.js"></script>
+
     <script src="/Scripts/ipaddr.min.js"></script>"
 
     <script type="text/javascript">
-        //$.ajaxSetup({
-        //    scriptCharset: "utf-8",
-        //    contentType: "application/json; charset=utf-8"
-        //});
+        $(document).ready(function () {
+            $('#frm').bootstrapValidator({
+                //feedbackIcons: {
+                //    valid: 'glyphicon glyphicon-ok',
+                //    invalid: 'glyphicon glyphicon-remove',
+                //    validating: 'glyphicon glyphicon-refresh'
+                //},
+                fields: {
+                    cityorip: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Поле не должно быть пустым'
+                            },
+                            callback: {
+                                message: 'The password is not valid',
+                                callback: function (value, validator, $field) {
+                                    if (value === '') {
+                                        return true;
+                                    }
 
-        //$('#frm').validator().on('invalid.bs.validator', function (e) {
-        //    //if (!e.isDefaultPrevented()) {
-        //        //if ($("#cityorip").val() == '')
-        //            //alert("invalid");
-        //        return false;
-        //        // handle the invalid form...
-        //    //} else {
-        //     //   e.preventDefault();
-        //        //alert("valid");
-        //        // everything looks good!
-        //    //}
-        //})
+                                    if ($cityorip.attr("list") == undefined) {
+                                        if (!ipaddr.isValid($('#cityorip').val())) {
+                                            return {
+                                                valid: false,
+                                                message: 'Недействительный IP адрес'
+                                            };
+                                        }
+                                    }
+
+                                    return true;
+                                }
+                            }
+                        }
+                    },
+                }
+            })
+            .on('success.form.bv', function (e) {
+                $('#frm').data('bootstrapValidator').resetForm();
+
+                // Prevent form submission
+                e.preventDefault();
+                Submit();
+            })
+            //.on('error.form.bv', function (e) {
+            //    alert("eeee");
+            //})
+        });
+
         var $cityorip = $("#cityorip");
         $("#aip").click(function (e) {
             e.preventDefault();
@@ -49,17 +86,20 @@
             $cityorip.attr("placeholder", "Введите название города");
         })
 
-        $("#btnSubmit").click(function (e) {
+        //$("#btnSubmit").click(function (e) {
+        function Submit() {
             $('#output').val('');
 
-            if ($cityorip.attr("list") == undefined)
-                if (!ipaddr.isValid($('#cityorip').val()))
-                    return;
+            //e.preventDefault();
 
-            if ($cityorip.val() == '') {
-                e.preventDefault();
-                return;
-            }
+            //if ($cityorip.attr("list") == undefined)
+            //    if (!ipaddr.isValid($('#cityorip').val()))
+            //        return;
+
+            //if ($cityorip.val() == '') {
+                //e.preventDefault();
+              //  return;
+            //}
 
             //var actionUrl = '@Url.Action("GetCity", "City", new { city = "$('#cityorip').val()" }, Request.Url.Scheme)';
             var url;
@@ -83,7 +123,7 @@
                         $ta.val(response.data.error);
                 }
             })
-        })
+        }
 
         $("#cityorip").keypress(function (e) {
             if (e.which === 13) {

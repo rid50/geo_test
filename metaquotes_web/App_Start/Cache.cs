@@ -76,7 +76,6 @@ namespace metaquotes_web
                 throw new ArgumentNullException("obj");
             }
 
-            int i = BitConverter.ToString(obj).GetHashCode();
             return BitConverter.ToString(obj).GetHashCode();
         }
     }
@@ -103,16 +102,16 @@ namespace metaquotes_web
             }
         }
 
-        static T PtrToStruct<T>(byte[] data) where T : struct
-        {
-            unsafe
-            {
-                fixed (byte* ptr = &data[0])
-                {
-                    return (T)Marshal.PtrToStructure(new IntPtr(ptr), typeof(T));
-                }
-            }
-        }
+        //static T PtrToStruct<T>(byte[] data) where T : struct
+        //{
+        //    unsafe
+        //    {
+        //        fixed (byte* ptr = &data[0])
+        //        {
+        //            return (T)Marshal.PtrToStructure(new IntPtr(ptr), typeof(T));
+        //        }
+        //    }
+        //}
 
         public static void LoadCache()
         {
