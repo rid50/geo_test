@@ -24,6 +24,7 @@ namespace metaquotes_web
     //unsafe struct Location
     public struct Location
     {
+        // ************************************************** Experimental Unsafe marshaling **************************
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         //public byte[] country;
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
@@ -40,6 +41,7 @@ namespace metaquotes_web
         //public fixed byte postal[12];       // почтовый индекс (случайная строка с префиксом "pos_")
         //public fixed byte city[24];         // название города (случайная строка с префиксом "cit_")
         //public fixed byte organization[32];   // название организации (случайная строка с префиксом "org_")
+        // ************************************************** Experimental Unsafe marshaling **************************
 
         public byte[] country;       // название страны (случайная строка с префиксом "cou_")
         public byte[] region;        // название области (случайная строка с префиксом "reg_")
@@ -102,6 +104,7 @@ namespace metaquotes_web
             }
         }
 
+        // ************************************************** Experimental Unsafe marshaling **************************
         //static T PtrToStruct<T>(byte[] data) where T : struct
         //{
         //    unsafe
@@ -121,10 +124,10 @@ namespace metaquotes_web
             using (BinaryReader br = new BinaryReader(fileStream))
             {
                 //Debug.WriteLine("Length of the stream: " + br.BaseStream.Length);
-                //byte[] bt = new byte[br.BaseStream.Length];
 
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
+                // ************************************************** Performance report **************************
+                //Stopwatch sw = new Stopwatch();
+                //sw.Start();
 
                 GeoBaseHeader hd;
                 hd.version = br.ReadInt32();
@@ -133,9 +136,7 @@ namespace metaquotes_web
                 hd.records = br.ReadInt32();
                 hd.offset_ranges = br.ReadUInt32();
                 hd.offset_cities = br.ReadUInt32();
-                Console.WriteLine("hd.offset_cities: " + hd.offset_cities);
                 hd.offset_locations = br.ReadUInt32();
-                Console.WriteLine("hd.offset_locations: " + hd.offset_locations);
 
                 ips = new Ip[hd.records];
 
@@ -150,6 +151,7 @@ namespace metaquotes_web
                 locations = new Location[hd.records];
                 for (int i = 0; i < hd.records; i++)
                 {
+                    // ************************************************** Experimental Unsafe marshaling **************************
                     //byte[] data = br.ReadBytes(Marshal.SizeOf(typeof(Location)));
                     //unsafe
                     //{
@@ -164,7 +166,7 @@ namespace metaquotes_web
                     br.ReadBytes(4);
                     locations[i].city = br.ReadBytes(20);
 
-                    // 
+                    // ************************************************** Experimental Unsafe marshaling **************************
                     //cities[i] = System.Text.Encoding.UTF8.GetString(Cache.locations[i].city);
                     //if (i < 110)
                     //{
@@ -177,8 +179,7 @@ namespace metaquotes_web
                     locations[i].longitude = br.ReadSingle();
                 }
 
-                //Debug.WriteLine(System.Text.Encoding.Default.GetString(locations[0].city));
-
+                // ************************************************** Parsing sorted index city byte array **************************
                 //byte[][] cities = new byte[hd.records][];
                 ////uint[] cities = new uint[hd.records];
 
@@ -191,8 +192,9 @@ namespace metaquotes_web
                 //if (BitConverter.IsLittleEndian)
                 //  Array.Reverse(cities[0]);
 
-                sw.Stop();
-                Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
+                // ************************************************** Performance report **************************
+                //sw.Stop();
+                //Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
             }
         }
     }

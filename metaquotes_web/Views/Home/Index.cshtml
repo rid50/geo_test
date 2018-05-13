@@ -1,7 +1,8 @@
 ﻿@section SPAViews {
     @Html.Partial("_Home")
 }
-@*
+
+@* // Disable Authorization support
     @section Scripts{
         @Scripts.Render("~/bundles/knockout")
         @Scripts.Render("~/bundles/app")
@@ -10,10 +11,15 @@
 
 @section Styles {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.bootstrapvalidator/0.5.3/css/bootstrapValidator.min.css" rel="stylesheet" />
+    <!--<style type="text/css">
+        .has-feedback .form-control-feedback {
+            top: 25px;
+            right: 0;
+        }
+    </style>-->
 }
 
 @section Scripts {
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.5.3/js/bootstrapValidator.min.js"></script>
 
     <script src="/Scripts/ipaddr.min.js"></script>"
@@ -62,9 +68,6 @@
                 e.preventDefault();
                 Submit();
             })
-            //.on('error.form.bv', function (e) {
-            //    alert("eeee");
-            //})
         });
 
         var $cityorip = $("#cityorip");
@@ -86,20 +89,8 @@
             $cityorip.attr("placeholder", "Введите название города");
         })
 
-        //$("#btnSubmit").click(function (e) {
         function Submit() {
             $('#output').val('');
-
-            //e.preventDefault();
-
-            //if ($cityorip.attr("list") == undefined)
-            //    if (!ipaddr.isValid($('#cityorip').val()))
-            //        return;
-
-            //if ($cityorip.val() == '') {
-                //e.preventDefault();
-              //  return;
-            //}
 
             //var actionUrl = '@Url.Action("GetCity", "City", new { city = "$('#cityorip').val()" }, Request.Url.Scheme)';
             var url;
