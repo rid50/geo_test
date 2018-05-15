@@ -17,21 +17,41 @@ namespace metaquotes_web
             return b1.Length == b2.Length && memcmp(b1, b2, b1.Length) == 0;
         }
 
+        static Dictionary<byte[], int> cities = null;
+
         // GET city/location
         public JsonResult GetCity(string city)
         {
-            Dictionary<byte[], int>.KeyCollection keyColl = Cache.cities.Keys;
+            if (cities == null)
+            {
+                cities = new Dictionary<byte[], int>();
+                unsafe
+                {
+                    byte[] bytes = new byte[24];
+                    fixed (Location* p = Cache.locations)
+                    {
+                        for (int i = 0; i < Cache.records; i++)
+                        {
+                            string str = new string((sbyte*)p[i].city);
+                            cities.Add(System.Text.Encoding.ASCII.GetBytes(str.Substring(4)), i);
+                        }
+                    }
+                }
+            }
+
+            //Dictionary<byte[], int>.KeyCollection keyColl = Cache.cities.Keys;
+            Dictionary<byte[], int>.KeyCollection keyColl = cities.Keys;
 
             byte[] key = System.Text.Encoding.ASCII.GetBytes(city.Substring(4));
 
-            Array.Resize(ref key, 20);
+            //Array.Resize(ref key, 20);
 
             int index = -1;
             foreach (byte[] k in keyColl)
             {
                 if (Compare(key, k)) {
-                    if (Cache.cities.ContainsKey(k))
-                        index = Cache.cities[k];
+                    if (cities.ContainsKey(k))
+                        index = cities[k];
 
                     break;
                 }
@@ -44,24 +64,6 @@ namespace metaquotes_web
                 data = new { error = "Данные отсутствуют" };
 
             return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
-
-            //if (index != -1)
-            //{
-            //    var data = new
-            //    {
-            //        city = System.Text.Encoding.UTF8.GetString(Cache.locations[index].city).Replace("\0", string.Empty),
-            //        country = System.Text.Encoding.UTF8.GetString(Cache.locations[index].country).Replace("\0", string.Empty).Substring(4),
-            //        region = System.Text.Encoding.UTF8.GetString(Cache.locations[index].region).Replace("\0", string.Empty).Substring(4),
-            //        postal = System.Text.Encoding.UTF8.GetString(Cache.locations[index].postal).Replace("\0", string.Empty).Substring(4),
-            //        organization = System.Text.Encoding.UTF8.GetString(Cache.locations[index].organization).Replace("\0", string.Empty).Substring(4),
-            //        latitude = Cache.locations[index].latitude,
-            //        longitude = Cache.locations[index].longitude
-            //    };
-
-            //    return new JsonResult { Data = data, ContentType = "application/json; charset=UTF-8" };
-            //}
-            //else
-            //    return new JsonResult { Data = new { error = "Данные отсутствуют" }, ContentType = "application/json; charset=UTF-8" };
         }
     }
 }

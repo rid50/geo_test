@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
-using System.Web;
-using System.Web.Hosting;
 
 namespace metaquotes_web
 {
-    struct GeoBaseHeader
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct GeoBaseHeader
     {
         public int version;
-        public byte[] name;
+        public fixed byte name[32];
         public ulong timestamp;
         public int records;
         public uint offset_ranges;
@@ -21,181 +18,145 @@ namespace metaquotes_web
         public uint offset_locations;
     }
 
-    //unsafe struct Location
-    public struct Location
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public unsafe struct Location
     {
-        // ************************************************** Experimental Unsafe marshaling **************************
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        //public byte[] country;
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        //public byte[] region;
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-        //public byte[] postal;
+        public fixed byte country[8];       // название страны (случайная строка с префиксом "cou_")
+        public fixed byte region[12];       // название области (случайная строка с префиксом "reg_")
+        public fixed byte postal[12];       // почтовый индекс (случайная строка с префиксом "pos_")
         //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
-        //public byte[] city;
-        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        //public byte[] organization;
-
-        //public fixed byte country[8];      // название страны (случайная строка с префиксом "cou_")
-        //public fixed byte region[12];       // название области (случайная строка с префиксом "reg_")
-        //public fixed byte postal[12];       // почтовый индекс (случайная строка с префиксом "pos_")
-        //public fixed byte city[24];         // название города (случайная строка с префиксом "cit_")
-        //public fixed byte organization[32];   // название организации (случайная строка с префиксом "org_")
-        // ************************************************** Experimental Unsafe marshaling **************************
-
-        public byte[] country;       // название страны (случайная строка с префиксом "cou_")
-        public byte[] region;        // название области (случайная строка с префиксом "reg_")
-        public byte[] postal;        // почтовый индекс (случайная строка с префиксом "pos_")
-        public byte[] city;          // название города (случайная строка с префиксом "cit_")
-        public byte[] organization;  // название организации (случайная строка с префиксом "org_")
-        public float latitude;       // широта
-        public float longitude;      // долгота
+        //public byte[] city;         // название города (случайная строка с префиксом "cit_")
+        public fixed byte city[24];         // название города (случайная строка с префиксом "cit_")
+        public fixed byte organization[32]; // название организации (случайная строка с префиксом "org_")
+        public float latitude;              // широта
+        public float longitude;             // долгота
     }
 
-    public struct Ip
+    struct Ip
     {
         public uint ip_from;           // начало диапазона IP адресов
         public uint ip_to;             // конец диапазона IP адресов
         public uint location_index;    // индекс записи о местоположении
     }
 
-    public class ByteArrayComparer : EqualityComparer<byte[]>
+    class Cache
     {
-        public override bool Equals(byte[] x, byte[] y)
-        {
-            if (x == null || y == null)
-            {
-                return x == y;
-            }
-            // Linq extension method
-            return x.SequenceEqual(y);
-        }
-
-        public override int GetHashCode(byte[] obj)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException("obj");
-            }
-
-            return BitConverter.ToString(obj).GetHashCode();
-        }
-    }
-
-    public class Cache
-    {
+        public static int records;
         public static Ip[] ips;
         public static Location[] locations;
-        public static Dictionary<byte[], int> cities;
-        //public static uint[] cities;
 
-        static T ToStruct<T>(byte[] data) where T : struct
+        const uint GENERIC_READ = 0x80000000;
+        const uint OPEN_EXISTING = 3;
+
+        [DllImport("kernel32", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Unicode)]
+        static extern unsafe IntPtr CreateFile
+        (
+            string FileName,          // file name
+            uint DesiredAccess,       // access mode
+            uint ShareMode,           // share mode
+            uint SecurityAttributes,  // Security Attributes
+            uint CreationDisposition, // how to create
+            uint FlagsAndAttributes,  // file attributes
+            int hTemplateFile         // handle to template file
+        );
+
+        [DllImport("kernel32", SetLastError = true)]
+        static extern unsafe bool ReadFile
+        (
+            IntPtr hFile,             // handle to file
+            void* pBuffer,            // data buffer
+            int NumberOfBytesToRead,  // number of bytes to read
+            int* pNumberOfBytesRead,  // number of bytes read
+            int Overlapped            // overlapped buffer
+        );
+
+        [DllImport("kernel32", SetLastError = true)]
+        static extern unsafe bool CloseHandle
+        (
+            IntPtr hObject // handle to object
+        );
+
+        public class ByteArrayComparer : EqualityComparer<byte[]>
         {
-            var size = Marshal.SizeOf(typeof(T));
-            IntPtr ptr = Marshal.AllocHGlobal(size);
-            try
+            public override bool Equals(byte[] x, byte[] y)
             {
-                Marshal.Copy(data, 0, ptr, size);
-                return (T)Marshal.PtrToStructure(ptr, typeof(T));
+                if (x == null || y == null)
+                {
+                    return x == y;
+                }
+                // Linq extension method
+                return x.SequenceEqual(y);
             }
-            finally
+
+            public override int GetHashCode(byte[] obj)
             {
-                Marshal.FreeHGlobal(ptr);
+                if (obj == null)
+                {
+                    throw new ArgumentNullException("obj");
+                }
+
+                return BitConverter.ToString(obj).GetHashCode();
             }
         }
-
-        // ************************************************** Experimental Unsafe marshaling **************************
-        //static T PtrToStruct<T>(byte[] data) where T : struct
-        //{
-        //    unsafe
-        //    {
-        //        fixed (byte* ptr = &data[0])
-        //        {
-        //            return (T)Marshal.PtrToStructure(new IntPtr(ptr), typeof(T));
-        //        }
-        //    }
-        //}
 
         public static void LoadCache()
         {
-            string path = AppDomain.CurrentDomain.GetData("DataDirectory").ToString();
-            FileStream fileStream = File.OpenRead(path + "/geobase.dat");
-
-            using (BinaryReader br = new BinaryReader(fileStream))
+            string path = System.Web.HttpContext.Current.Server.MapPath("~/App_Data/geobase.dat");
+            if (!System.IO.File.Exists(path))
             {
-                //Debug.WriteLine("Length of the stream: " + br.BaseStream.Length);
-
-                // ************************************************** Performance report **************************
-                //Stopwatch sw = new Stopwatch();
-                //sw.Start();
-
-                GeoBaseHeader hd;
-                hd.version = br.ReadInt32();
-                hd.name = br.ReadBytes(32);
-                hd.timestamp = br.ReadUInt64();
-                hd.records = br.ReadInt32();
-                hd.offset_ranges = br.ReadUInt32();
-                hd.offset_cities = br.ReadUInt32();
-                hd.offset_locations = br.ReadUInt32();
-
-                ips = new Ip[hd.records];
-
-                for (int i = 0; i < hd.records; i++)
-                {
-                    ips[i].ip_from = br.ReadUInt32();
-                    ips[i].ip_to = br.ReadUInt32();
-                    ips[i].location_index = br.ReadUInt32();
-                }
-
-                cities = new Dictionary<byte[], int>();
-                locations = new Location[hd.records];
-                for (int i = 0; i < hd.records; i++)
-                {
-                    // ************************************************** Experimental Unsafe marshaling **************************
-                    //byte[] data = br.ReadBytes(Marshal.SizeOf(typeof(Location)));
-                    //unsafe
-                    //{
-                    //    fixed (byte* ptr = &data[0])
-                    //    {
-                    //        locations[i] = (Location)Marshal.PtrToStructure(new IntPtr(ptr), typeof(Location));
-                    //    }
-
-                    locations[i].country = br.ReadBytes(8);
-                    locations[i].region = br.ReadBytes(12);
-                    locations[i].postal = br.ReadBytes(12);
-                    br.ReadBytes(4);
-                    locations[i].city = br.ReadBytes(20);
-
-                    // ************************************************** Experimental Unsafe marshaling **************************
-                    //cities[i] = System.Text.Encoding.UTF8.GetString(Cache.locations[i].city);
-                    //if (i < 110)
-                    //{
-                    //    Debug.WriteLine(System.Text.Encoding.UTF8.GetString(Cache.locations[i].city));
-                    //    Debug.WriteLine("\n");
-                    //}
-                    cities.Add(locations[i].city, i);
-                    locations[i].organization = br.ReadBytes(32);
-                    locations[i].latitude = br.ReadSingle();
-                    locations[i].longitude = br.ReadSingle();
-                }
-
-                // ************************************************** Parsing sorted index city byte array **************************
-                //byte[][] cities = new byte[hd.records][];
-                ////uint[] cities = new uint[hd.records];
-
-                //for (int i = 0; i < hd.records; i++)
-                //{
-                //    //cities[i] = br.ReadUInt32();
-                //    cities[i] = br.ReadBytes(4);
-                //}
-
-                //if (BitConverter.IsLittleEndian)
-                //  Array.Reverse(cities[0]);
-
-                // ************************************************** Performance report **************************
-                //sw.Stop();
-                //Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
+                Debug.WriteLine("File geobase.dat not found.");
+                return;
             }
+
+            IntPtr handle = CreateFile(path, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0);
+            if (handle == new IntPtr(-1))
+            {
+                Debug.WriteLine("Can't open file geobase.dat");
+                return;
+            }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            GeoBaseHeader[] hd = new GeoBaseHeader[1];
+            int n = 0;
+            unsafe {
+                fixed (GeoBaseHeader* p = hd)
+                {
+                    bool b = ReadFile(handle, p, sizeof(GeoBaseHeader), &n, 0);
+                    records = hd[0].records;
+                }
+            }
+
+            //var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)hd[0].timestamp).DateTime;
+
+            ips = new Ip[hd[0].records];
+            n = 0;
+            unsafe
+            {
+                fixed (Ip* p = ips)
+                {
+                    ReadFile(handle, p, sizeof(Ip) * hd[0].records, &n, 0);
+                }
+            }
+
+            //Console.WriteLine("ip_from: " + IpUintToIpString(ips[1].ip_from));
+
+            locations = new Location[hd[0].records];
+            n = 0;
+            unsafe
+            {
+                fixed (Location* p = locations)
+                {
+                    ReadFile(handle, p, sizeof(Location) * hd[0].records, &n, 0);
+                }
+            }
+
+            sw.Stop();
+            Debug.WriteLine("TotalMilliseconds: " + sw.Elapsed.TotalMilliseconds);
+
+            CloseHandle(handle);
+
         }
     }
 }
